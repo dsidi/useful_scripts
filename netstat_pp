@@ -1,0 +1,25 @@
+#!/bin/ksh
+# 
+# netstat_pp
+# -----------------------------------------------------------------------------
+# Display wide netstat output nicely ("pretty print").
+#
+# :author: david <david@sidiprojects.us> 0x84969123EEBA8245 
+# :license: Three-clause BSD
+# :copyright: (c) 2017 David Sidi
+
+set -e
+NETSTAT_OPTS="utalW"  # set nice options for netstat
+
+# add -p to netstat options for Ubuntu only
+if [[ $((lsb_release -a | grep Ubuntu) > /dev/null 2>&1)  -eq 0 ]]; then
+   NETSTAT_OPTS="${NETSTAT_OPTS}p"
+fi
+
+NETSTAT_OUT=$(netstat -${NETSTAT_OPTS} 2>/dev/null)
+HEAD=$(head -n 1 <<<"${NETSTAT_OUT}")
+BODY=$(tail -n +2  <<<"${NETSTAT_OUT}" | sed 's/\b\([[:alnum:]]\+\)\b\s\+Address/\1-Address/g')
+
+# Print formatted output to stdout
+print "$HEAD"
+column -t <<< "${BODY}"
